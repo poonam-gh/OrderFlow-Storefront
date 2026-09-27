@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OrderFlow Storefront</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">🧾 OrderFlow</div>
+
+      <div class="lang-switch">
+        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="hi">हिं</button>
+      </div>
+
+      <div id="user-info" class="user-info hidden">
+        <span id="user-email"></span>
+        <button id="logout-btn" class="btn btn-ghost" data-i18n="logout">Log out</button>
+      </div>
+    </div>
+
+    <nav id="tab-nav" class="tab-nav hidden">
+      <button class="tab-nav-btn active" data-route="products" data-i18n="nav_products">Products</button>
+      <button class="tab-nav-btn" data-route="orders" data-i18n="nav_orders">Orders</button>
+      <button class="tab-nav-btn" data-route="billing" data-i18n="nav_billing">Billing</button>
+      <button class="tab-nav-btn" data-route="profile" data-i18n="nav_profile">Profile</button>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- Auth screen -->
+    <section id="auth-view" class="card auth-card">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="login" data-i18n="auth_login_tab">Log in</button>
+        <button class="tab-btn" data-tab="register" data-i18n="auth_register_tab">Register</button>
+      </div>
+
+      <form id="login-form" class="tab-panel active">
+        <label><span data-i18n="auth_email">Email</span> <input type="email" id="login-email" required /></label>
+        <label><span data-i18n="auth_password">Password</span> <input type="password" id="login-password" required /></label>
+        <button type="submit" class="btn btn-primary" data-i18n="auth_login_btn">Log in</button>
+      </form>
+
+      <form id="register-form" class="tab-panel">
+        <label><span data-i18n="auth_email">Email</span> <input type="email" id="register-email" required /></label>
+        <label><span data-i18n="auth_password">Password</span> <input type="password" id="register-password" required minlength="8" /></label>
+        <label><span data-i18n="auth_role">Account type</span>
+          <select id="register-role">
+            <option value="customer" data-i18n="auth_role_customer">Customer</option>
+            <option value="product_owner" data-i18n="auth_role_product_owner">Product owner (CMS)</option>
+          </select>
+        </label>
+        <button type="submit" class="btn btn-primary" data-i18n="auth_register_btn">Create account</button>
+      </form>
+
+      <p class="hint" data-i18n="auth_hint">Register a new account, or log in if you already have one.</p>
+      <p id="auth-error" class="error hidden"></p>
+    </section>
+
+    <!-- Products screen -->
+    <section id="screen-products" class="screen hidden">
+      <div id="admin-panel" class="card hidden">
+        <h3><span data-i18n="admin_add_product">Add a product</span> <span id="admin-panel-role-badge" class="badge badge-admin"></span></h3>
+        <form id="product-form">
+          <div class="form-grid">
+            <label><span data-i18n="admin_name_en">Name (English)</span> <input type="text" id="product-name-en" required /></label>
+            <label><span data-i18n="admin_desc_en">Description (English)</span> <input type="text" id="product-desc-en" /></label>
+            <label><span data-i18n="admin_name_hi">Name (Hindi, optional)</span> <input type="text" id="product-name-hi" /></label>
+            <label><span data-i18n="admin_desc_hi">Description (Hindi, optional)</span> <input type="text" id="product-desc-hi" /></label>
+            <label><span data-i18n="admin_price">Price (₹)</span> <input type="number" id="product-price" min="1" step="0.01" required /></label>
+            <label><span data-i18n="admin_stock">Stock</span> <input type="number" id="product-stock" min="0" required /></label>
+          </div>
+          <button type="submit" class="btn btn-secondary" data-i18n="admin_add_btn">Add product</button>
+        </form>
+        <p id="product-form-error" class="error hidden"></p>
+      </div>
+
+      <h2 data-i18n="products_heading">Products</h2>
+      <div id="products-grid" class="products-grid"></div>
+    </section>
+
+    <!-- Orders list screen -->
+    <section id="screen-orders" class="screen hidden">
+      <h2 data-i18n="orders_heading">Your orders</h2>
+      <div id="orders-list" class="orders-list"></div>
+    </section>
+
+    <!-- Order detail screen -->
+    <section id="screen-order-detail" class="screen hidden">
+      <button id="order-detail-back" class="btn btn-ghost" data-i18n="order_detail_back">Back to orders</button>
+      <div class="card">
+        <h2 data-i18n="order_detail_heading">Order details</h2>
+        <div id="order-detail-body"></div>
+      </div>
+    </section>
+
+    <!-- Billing screen -->
+    <section id="screen-billing" class="screen hidden">
+      <h2 data-i18n="billing_heading">Billing</h2>
+      <div class="card billing-card">
+        <div id="billing-items" class="cart-items"></div>
+        <div id="billing-empty" class="cart-empty hidden" data-i18n="billing_empty">Your cart is empty.</div>
+        <div id="billing-totals" class="billing-totals hidden">
+          <div class="billing-row"><span data-i18n="billing_subtotal">Subtotal</span> <span id="billing-subtotal">₹0.00</span></div>
+          <div class="billing-row billing-total-row"><span data-i18n="billing_total">Total</span> <span id="billing-total">₹0.00</span></div>
+        </div>
+        <button id="billing-pay-btn" class="btn btn-primary btn-block" data-i18n="billing_pay_btn">Proceed to payment</button>
+        <button id="billing-browse-btn" class="btn btn-ghost btn-block hidden" data-i18n="billing_back_to_products">Browse products</button>
+        <p id="billing-error" class="error hidden"></p>
+      </div>
+      <div id="order-status-card" class="card order-status-card hidden">
+        <div id="order-status-body"></div>
+      </div>
+    </section>
+
+    <!-- Profile screen -->
+    <section id="screen-profile" class="screen hidden">
+      <h2 data-i18n="profile_heading">Profile</h2>
+      <form id="profile-form" class="card profile-form">
+        <label><span data-i18n="profile_email">Email</span> <input type="email" id="profile-email" disabled /></label>
+        <label><span data-i18n="profile_name">Name</span> <input type="text" id="profile-name" /></label>
+        <label><span data-i18n="profile_phone">Phone</span> <input type="text" id="profile-phone" /></label>
+        <label><span data-i18n="profile_address">Address</span> <input type="text" id="profile-address" /></label>
+        <button type="submit" class="btn btn-primary" data-i18n="profile_save_btn">Save changes</button>
+        <p id="profile-saved" class="saved-msg hidden" data-i18n="profile_saved">Saved!</p>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- Bottom sticky cart bar -->
+  <div id="cart-bar" class="cart-bar hidden">
+    <span id="cart-bar-summary"></span>
+    <button id="cart-bar-btn" class="btn btn-primary" data-i18n="cart_bar_view">View cart</button>
+  </div>
+
+  <!-- Razorpay-style checkout modal (mocked, no real gateway involved) -->
+  <div id="razorpay-overlay" class="rzp-overlay hidden">
+    <div class="rzp-modal">
+      <button id="rzp-close" class="rzp-close" aria-label="Close">&times;</button>
+
+      <div class="rzp-left">
+        <div class="rzp-brand">🧾 OrderFlow</div>
+        <div class="rzp-amount" id="rzp-amount">₹0.00</div>
+        <div class="rzp-order-id" id="rzp-order-id"></div>
+        <div class="rzp-badge">TEST MODE</div>
+      </div>
+
+      <div class="rzp-right">
+        <div class="rzp-powered">
+          <span>Powered by</span> <strong>Razorpay</strong> <span class="rzp-mock-tag">(mock)</span>
+        </div>
+
+        <form id="rzp-form">
+          <label><span data-i18n="rzp_card_number">Card number</span>
+            <input type="text" id="rzp-card-number" value="4111 1111 1111 1111" maxlength="19" required />
+          </label>
+          <div class="rzp-row">
+            <label><span data-i18n="rzp_expiry">Expiry</span> <input type="text" id="rzp-expiry" value="12/29" required /></label>
+            <label><span data-i18n="rzp_cvv">CVV</span> <input type="text" id="rzp-cvv" value="123" maxlength="3" required /></label>
+          </div>
+          <label><span data-i18n="rzp_name">Name on card</span> <input type="text" id="rzp-name" value="Test User" required /></label>
+
+          <button type="submit" id="rzp-pay-btn" class="btn btn-primary btn-block">
+            <span data-i18n="rzp_pay">Pay</span> <span id="rzp-pay-amount"></span>
+          </button>
+
+          <p class="rzp-hint" data-i18n="rzp_hint">
+            Use 4111 1111 1111 1111 for a successful test payment, or any other card number to simulate a decline.
+          </p>
+          <p id="rzp-error" class="error hidden"></p>
+        </form>
+
+        <div id="rzp-processing" class="rzp-processing hidden">
+          <div class="spinner spinner-lg"></div>
+          <p id="rzp-processing-label" data-i18n="rzp_processing">Processing payment…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
